@@ -99,10 +99,10 @@ class ResearchAgent:
         question_set = self.plan(topic)
 
         all_notes: List[SearchResultNote] = []
-        seen_urls = set()
+        seen_urls = set() #??
 
         for subq in question_set.subquestions:
-            results = run_search(self.search_tool, subq)[:2]
+            results = run_search(self.search_tool, subq)[:2] ## 하드 코딩 ? max_result 안쓰고
 
             for result in results:
                 url = result.get("url")
@@ -118,7 +118,7 @@ class ResearchAgent:
                 except Exception as e:
                     print(f"Skipping result due to evaluation error: {e}")
 
-            if len(all_notes) >= 4:
+            if len(all_notes) >= 4: # Threshhold 하드 코딩?  thresh hold 같은거 config로 정해야
                 break
 
         report = self.synthesize(topic, all_notes)
