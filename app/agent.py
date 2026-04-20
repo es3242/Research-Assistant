@@ -120,7 +120,7 @@ class ResearchAgent:
                 except Exception as e:
                     print(f"Skipping result due to evaluation error: {e}")
 
-            if len(all_notes) >= 4: # Threshhold 하드 코딩?  thresh hold 같은거 config로 정해야
+            if len(all_notes) >= 4:
                 break
 
         report = self.synthesize(topic, all_notes)
