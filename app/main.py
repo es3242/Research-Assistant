@@ -100,7 +100,7 @@ def main():
     agent = ResearchAgent(
         provider=args.provider,
         model=args.model,
-        max_results=2,
+        max_results=2, # limited search results to two per sub-question for test to keep latency and cost manageable.
     )
     result = agent.run(args.topic)
 

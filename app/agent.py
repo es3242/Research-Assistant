@@ -18,8 +18,9 @@ class ResearchAgent:
     ):
         self.provider = provider
         self.model_name = model
-        self.llm = build_llm(provider=provider, model=model, temperature=0)
+        self.llm = build_llm(provider=provider, model=model, temperature=0) #set temperature to 0 to  generate consistent structured outputs rather than creative generation
         self.search_tool = build_search_tool(max_results=max_results)
+        self.max_results = max_results
 
     def plan(self, topic: str) -> ResearchQuestionSet:
         prompt = ChatPromptTemplate.from_messages(
@@ -101,8 +102,9 @@ class ResearchAgent:
         all_notes: List[SearchResultNote] = []
         seen_urls = set()
 
+        
         for subq in question_set.subquestions:
-            results = run_search(self.search_tool, subq)[:2]
+            results = run_search(self.search_tool, subq)[: self.max_results]
 
             for result in results:
                 url = result.get("url")
