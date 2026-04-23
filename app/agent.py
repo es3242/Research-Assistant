@@ -14,13 +14,13 @@ class ResearchAgent:
         self,
         provider: str = "ollama",
         model: str | None = None,
-        max_results: int = 2,
+        search_results_per_question: int = 2,
     ):
         self.provider = provider
         self.model_name = model
         self.llm = build_llm(provider=provider, model=model, temperature=0) #set temperature to 0 to  generate consistent structured outputs rather than creative generation
-        self.search_tool = build_search_tool(max_results=max_results)
-        self.max_results = max_results
+        self.search_tool = build_search_tool(search_results_per_question=search_results_per_question)
+        self.search_results_per_question = search_results_per_question
 
     def plan(self, topic: str) -> ResearchQuestionSet:
         prompt = ChatPromptTemplate.from_messages(
@@ -97,33 +97,49 @@ class ResearchAgent:
         )
 
     def run(self, topic: str) -> dict:
+        print(f"[1/4] Planning research questions for topic: {topic}")
         question_set = self.plan(topic)
 
         all_notes: List[SearchResultNote] = []
         seen_urls = set()
 
-        
-        for subq in question_set.subquestions:
-            results = run_search(self.search_tool, subq)[: self.max_results]
+        for idx, subq in enumerate(question_set.subquestions, start=1):
+            print(f"[2/4] Searching for sub-question {idx}/{len(question_set.subquestions)}: {subq}")
 
-            for result in results:
+            results = run_search(self.search_tool, subq)[: self.search_results_per_question]
+
+            for result_idx, result in enumerate(results, start=1):
                 url = result.get("url")
+
                 if not url or url in seen_urls:
+                    print("      Skipping duplicate or missing URL.")
                     continue
 
                 seen_urls.add(url)
 
+                title = result.get("title", "Untitled")
+                print(f"      Evaluating result {result_idx}/{len(results)}: {title}")
+
                 try:
                     note = self.evaluate_result(subq, result)
+
                     if note.relevant:
+                        print(f"      Relevant result found. Score: {note.relevance_score}")
                         all_notes.append(note)
+                    else:
+                        print(f"      Skipped. Score: {note.relevance_score}")
+
                 except Exception as e:
-                    print(f"Skipping result due to evaluation error: {e}")
+                    print(f"      Skipping result due to evaluation error: {e}")
 
             if len(all_notes) >= 4:
+                print("[3/4] Enough relevant notes collected. Stopping search early.")
                 break
 
+        print(f"[4/4] Synthesizing final report from {len(all_notes)} notes.")
         report = self.synthesize(topic, all_notes)
+
+        print("Done. Final report generated.")
 
         return {
             "question_set": question_set,

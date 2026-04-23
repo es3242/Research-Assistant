@@ -1,8 +1,8 @@
 from langchain_tavily import TavilySearch
 
 
-def build_search_tool(max_results: int = 2):
-    return TavilySearch(max_results=max_results)
+def build_search_tool(search_results_per_question: int = 2):
+    return TavilySearch(search_results_per_question=search_results_per_question)
 
 
 def run_search(search_tool, query: str):
