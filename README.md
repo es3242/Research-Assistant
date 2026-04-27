@@ -28,7 +28,8 @@ research-assistant/
 │  ├─ llm_factory.py
 │  ├─ prompts.py
 │  ├─ schemas.py
-│  └─ search.py
+│  ├─ search.py
+│  └─ utils.py
 ├─ outputs/
 ├─ requirements.txt
 ├─ .env.example
